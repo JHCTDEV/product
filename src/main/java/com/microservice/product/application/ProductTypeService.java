@@ -1,11 +1,10 @@
 package com.microservice.product.application;
 
-import com.microservice.product.domain.entities.ProductEntity;
+import com.microservice.product.domain.entities.ProductTypeEntity;
+import com.microservice.product.domain.repositories.IProductTypeRepository;
 import com.microservice.product.domain.services.IProductExceptionService;
-import com.microservice.product.domain.services.IProductService;
-import com.microservice.product.domain.repositories.IProductRepository;
+import com.microservice.product.domain.services.IProductTypeService;
 import com.microservice.product.infrastructure.IModelMapper;
-import com.microservice.product.infrastructure.dto.ProductDto;
 import com.microservice.product.infrastructure.dto.ProductTypeDto;
 import com.microservice.product.infrastructure.dto.ResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,17 +16,17 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class ProductService implements IProductService {
+public class ProductTypeService implements IProductTypeService {
     @Autowired
-    private IProductRepository productRepository;
+    private IProductTypeRepository productTypeRepository;
     @Autowired
     private IModelMapper modelMapper;
     @Autowired
     private IProductExceptionService productExceptionService;
     @Override
     public Mono<ResponseDto> findAll() {
-        return this.productRepository.findAll().collectList().flatMap(listProductEntity -> {
-            List<ProductTypeDto> listProductTypeDto = listProductEntity.stream().map(productEntity -> (ProductTypeDto) this.modelMapper.convert(productEntity, ProductTypeDto.class)).collect(Collectors.toList());
+        return this.productTypeRepository.findAll().collectList().flatMap(listProductTypeEntity -> {
+            List<ProductTypeDto> listProductTypeDto = listProductTypeEntity.stream().map(productTypeEntity -> (ProductTypeDto) this.modelMapper.convert(productTypeEntity, ProductTypeDto.class)).collect(Collectors.toList());
             ResponseDto responseDto = new ResponseDto();
             responseDto.setSuccess(true);
             responseDto.setData(listProductTypeDto);
@@ -35,12 +34,13 @@ public class ProductService implements IProductService {
         });
 
     }
+
     @Override
-    public Mono<ResponseDto> create(ProductDto productDto) {
-        ProductEntity productEntity = (ProductEntity) this.modelMapper.convert(productDto,ProductEntity.class);
-        productEntity.setCreateAt(new Date());
-        productEntity.setStatus("1");
-        return this.productRepository.save(productEntity).flatMap(entity -> {
+    public Mono<ResponseDto> create(ProductTypeDto productTypeDto) {
+        ProductTypeEntity productTypeEntity = (ProductTypeEntity) this.modelMapper.convert(productTypeDto,ProductTypeEntity.class);
+        productTypeEntity.setCreateAt(new Date());
+        productTypeEntity.setStatus("1");
+        return this.productTypeRepository.save(productTypeEntity).flatMap(entity -> {
             ResponseDto responseDto = new ResponseDto();
             responseDto.setSuccess(true);
             responseDto.setData(this.modelMapper.convert(entity,ProductTypeDto.class));
@@ -50,14 +50,14 @@ public class ProductService implements IProductService {
     }
 
     @Override
-    public Mono<ResponseDto> update(ProductDto productDto) {
-        return this.productRepository.findById(productDto.getId()).flatMap(productEntity -> {
-            if (productEntity.getId() == null)
-                return Mono.error(new Exception("product does not exist"));
-            return this.productRepository.save(productEntity).flatMap(entity -> {
+    public Mono<ResponseDto> update(ProductTypeDto productTypeDto) {
+        return this.productTypeRepository.findById(productTypeDto.getId()).flatMap(productTypeEntity -> {
+            if (productTypeEntity.getId() == null)
+                return Mono.error(new Exception("product type does not exist"));
+            return this.productTypeRepository.save(productTypeEntity).flatMap(entity -> {
                 ResponseDto responseDto = new ResponseDto();
                 responseDto.setSuccess(true);
-                responseDto.setData(this.modelMapper.convert(entity,ProductDto.class));
+                responseDto.setData(this.modelMapper.convert(entity,ProductTypeDto.class));
                 return Mono.just(responseDto);
             });
 
@@ -71,11 +71,11 @@ public class ProductService implements IProductService {
 
     @Override
     public Mono<ResponseDto> findById(String id) {
-        return this.productRepository.findById(id).flatMap(productEntity -> {
-            ProductDto productDto = (ProductDto) this.modelMapper.convert(productEntity, ProductDto.class);
+        return this.productTypeRepository.findById(id).flatMap(productTypeEntity -> {
+            ProductTypeDto productTypeDto = (ProductTypeDto) this.modelMapper.convert(productTypeEntity, ProductTypeDto.class);
             ResponseDto responseDto = new ResponseDto();
             responseDto.setSuccess(true);
-            responseDto.setData(productDto);
+            responseDto.setData(productTypeDto);
             return Mono.just(responseDto);
         });
 
