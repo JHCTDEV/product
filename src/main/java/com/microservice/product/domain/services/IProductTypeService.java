@@ -12,4 +12,5 @@ public interface IProductTypeService {
     Mono<ResponseDto> update(ProductTypeDto productTypeDto);
     Mono<Void> delete(String id);
     Mono<ResponseDto> findById(String id);
+    Mono<ResponseDto> findByProduct(String id);
 }

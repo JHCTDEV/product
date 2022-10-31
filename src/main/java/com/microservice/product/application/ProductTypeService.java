@@ -1,6 +1,8 @@
 package com.microservice.product.application;
 
+import com.microservice.product.domain.entities.ProductEntity;
 import com.microservice.product.domain.entities.ProductTypeEntity;
+import com.microservice.product.domain.repositories.IProductRepository;
 import com.microservice.product.domain.repositories.IProductTypeRepository;
 import com.microservice.product.domain.services.IProductExceptionService;
 import com.microservice.product.domain.services.IProductTypeService;
@@ -13,6 +15,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Date;
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,7 +23,9 @@ public class ProductTypeService implements IProductTypeService {
     @Autowired
     private IProductTypeRepository productTypeRepository;
     @Autowired
-    private IModelMapper modelMapper;
+    private IProductRepository     productRepository;
+    @Autowired
+    private IModelMapper           modelMapper;
     @Autowired
     private IProductExceptionService productExceptionService;
     @Override
@@ -33,6 +38,20 @@ public class ProductTypeService implements IProductTypeService {
             return Mono.just(responseDto);
         });
 
+    }
+
+    @Override
+    public Mono<ResponseDto> findByProduct(String idProduct) {
+        Function<ProductEntity,Mono<ResponseDto>> getProductType = productEntity -> {
+            return this.productTypeRepository.findById(productEntity.getType()).flatMap(productTypeEntity -> {
+                ProductTypeDto productTypeDto = (ProductTypeDto) this.modelMapper.convert(productTypeEntity, ProductTypeDto.class);
+                ResponseDto responseDto = new ResponseDto();
+                responseDto.setSuccess(true);
+                responseDto.setData(productTypeDto);
+                return Mono.just(responseDto);
+            });
+        };
+        return this.productRepository.findById(idProduct).flatMap(getProductType);
     }
 
     @Override
@@ -78,6 +97,5 @@ public class ProductTypeService implements IProductTypeService {
             responseDto.setData(productTypeDto);
             return Mono.just(responseDto);
         });
-
     }
 }

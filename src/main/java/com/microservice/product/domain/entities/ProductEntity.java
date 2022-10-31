@@ -17,7 +17,6 @@ public class ProductEntity {
     private String name;
     private String description;
     private Float minimumAmount;
-    private Integer maximumNumberTransactions;
     private String type;
     private Date createAt;
     private Date updateAt;
